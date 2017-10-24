@@ -7,7 +7,7 @@ Simple example how to dynamically create env variables or secret env variables f
 kubectl create secret generic test-env --from-env-file=variables
 ```
 
-For Ansible run 
+Run Ansible to generate manifest from template via 
 
 ```
 ansible-playbook gen-template.yaml
