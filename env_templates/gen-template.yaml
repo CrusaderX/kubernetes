@@ -1,0 +1,19 @@
+---
+
+- hosts: localhost
+  become: false
+  vars:
+    containers:
+      env:
+        - name: test-env-1
+          value: test-value-1
+        - name: test-env-2
+          value: test-value-2
+      secret_env: "{{ lookup('file', 'variables' ) }}"
+    kubernetes:
+      secret: "{{ ENV_SECRET | default('test-env')}}"
+  tasks:
+    - name: generate config from template
+      template:
+        src: "templates/pod.j2"
+        dest: "{{ dest | default('./test-pod.yaml') }}"
