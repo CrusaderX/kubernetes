@@ -19,3 +19,5 @@ in your container via
 ```
 kubectl exec envars-test-pod -- env
 ```
+
+or if you do not need a template engine you can crate `PodPreset`, example located in `manifests` directory. For more information, read official kubernetes documentation.
