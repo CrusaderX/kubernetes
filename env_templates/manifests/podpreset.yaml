@@ -9,4 +9,4 @@ spec:
       - { key: app, operator: In, values: ['backend','redis','queque']} # any label of your pods
   envFrom:
     - configMapRef: # or secretRef
-        name: env
+        name: test-env
