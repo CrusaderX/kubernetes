@@ -6,9 +6,6 @@ kops edit cluster --name=my_cluster
 
 ```yaml
  kubeAPIServer:
-    basicAuthFile: ""
-    TokenAuthFile: ""
-    anonymousAuth: "false"
     authorizationMode: RBAC,Node
     auditLogPath: /var/log/kube-apiserver-audit.log
     auditLogMaxAge: 30
@@ -99,7 +96,12 @@ kops edit cluster --name=my_cluster
       - Master
 
 ```
-
+Insert into etcd section: 
+```yaml  
+  enableEtcdTLS: true
+  enableEtcdAuth: true
+  version: 3.1.17
+```
 Enable `encryptionConfig` via `config.yaml`:
 
 ```yaml
@@ -119,19 +121,12 @@ where `{{ secret }}` is:
 
 ```bash
 
-echo $( head -c 32 /dev/urandom | base64 )`
+echo $( head -c 32 /dev/urandom | base64 )
 ```
 
 ```bash
 kops create secret encryptionconfig -f config.yaml --name=my_cluster
 ```
-
-Insert into etcd section: 
-```yaml  
-  enableEtcdTLS: true
-  enableEtcdAuth: true
-  version: 3.1.17
-``
 
 Update cluster:
 
