@@ -132,16 +132,14 @@ Update cluster:
 
 ```bash
 
-kops update cluster --name=my_cluster --yes && \
-    kops rolling-update cluster --yes
+kops update cluster --name=my_cluster --yes
 ```
 
 We can ensure, that `secret` now encrypted:
 ```bash
 
-kubectl exec -ti $(kubectl get pods -n kube-system -l k8s-app=etcd-server -o=jsonpath='{.items[0].metadata.name}') /bin/sh
+kubectl exec -n kube-system -ti $(kubectl get pods -n kube-system -l k8s-app=etcd-server -o=jsonpath='{.items[0].metadata.name}') /bin/sh
 
 ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /registry/secrets --keys-only --prefix
-ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /
-registry/secrets/default/default-token-{{ my_token }}  --prefix
+ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /registry/secrets/default/default-token-{{ my_token }}  --prefix
 ```
