@@ -146,7 +146,7 @@ ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubern
 ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /registry/secrets/default/default-token-{{ my_token }}  --prefix
 ```
 
-Do not forget to add `automountServiceAccountToken: false` record to `spec` location in your `Deployment/Pod/etc`.
+Do not forget to add `automountServiceAccountToken: false` record to `spec` location in your `Deployment/Pod/etc` or disable it on `ServiceAccount` level.
 
 Do not forget to protect `get aws metaData` from pod: use `NetworkPolicy` or `kiam` or smt.
 
