@@ -1,4 +1,6 @@
-After creating cluster, we need to modify it:
+Kops/AWS security text file
+
+After creating cluster, modify it:
 
 ```bash
 kops edit cluster --name=my_cluster
@@ -135,11 +137,38 @@ Update cluster:
 kops update cluster --name=my_cluster --yes
 ```
 
-We can ensure, that `secret` now encrypted:
+Ensure that `secret` now encrypted:
 ```bash
 
 kubectl exec -n kube-system -ti $(kubectl get pods -n kube-system -l k8s-app=etcd-server -o=jsonpath='{.items[0].metadata.name}') /bin/sh
 
 ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /registry/secrets --keys-only --prefix
 ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /registry/secrets/default/default-token-{{ my_token }}  --prefix
+```
+
+Do not forget to add `automountServiceAccountToken: false` record to `spec` location in your `Deployment/Pod/etc`.
+
+Do not forget to protect `get aws metaData` from pod: use `NetworkPolicy` or `kiam` or smt.
+
+Modify `kube-apiserver.manifest` to disable some security issues:
+```python
+def change_api_manifest(file):
+    with open(file,'r') as input_file:
+        results = yaml_as_python(input_file)
+        for item in results["spec"]["containers"]:
+            for command in item["command"]:
+                if 'token-auth-file' in command:
+                    command = re.sub(r'--token-auth-file.*?\s',r"", command)
+                if 'basic-auth-file' in command:
+                    command = re.sub(r'--basic-auth-file.*?\s',r"", command)
+                if 'profiling' not in command:
+                    command = re.sub(r'(\/bin\/kube-apiserver\s)(--)', r'\1--profiling=false \2', command)
+                if 'service-account-lookup' not in command:
+                    command = re.sub(r'(\/bin\/kube-apiserver\s)(--)', r"\1--service-account-lookup=true \2", command)
+                if 'service-account-key-file' not in command:
+                    command = re.sub(r'(\/bin\/kube-apiserver\s)(--)', r"\1--service-account-key-file=/srv/kubernetes/server.key \2", command)
+                if 'repair-malformed-updates' not in command:
+                    command = re.sub(r'(\/bin\/kube-apiserver\s)(--)', r"\1--repair-malformed-updates=false \2", command)
+            item["command"][2] = command
+        return results
 ```
