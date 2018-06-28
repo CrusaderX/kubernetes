@@ -150,3 +150,20 @@ ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubern
 ETCDCTL_API=3  etcdctl --cert  /srv/kubernetes/etcd-client.pem --key /srv/kubernetes/etcd-client-key.pem --cacert /srv/kubernetes/ca.crt --endpoints https://127.0.0.1:4001 get /
 registry/secrets/default/default-token-{{ my_token }}  --prefix
 ```
+
+---
+
+TLS for Tiller & Helm
+
+Add `v3_ca` section configuration for v3_ca certificate generation
+
+```bash
+sudo sh -c 'cat <<EOF >> /etc/ssl/openssl.cnf
+[ v3_ca ]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+EOF'
+```
+
+
