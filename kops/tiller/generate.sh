@@ -101,7 +101,7 @@ function helmInit(){
 }
 
 $(pwd)/init.sh
-input "$@"h
+input "$@"
 rootCA
 tillerCert
 helmCert
