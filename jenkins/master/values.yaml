@@ -1,0 +1,30 @@
+services:
+  http:
+    port: !!str 8080
+    options: {}
+  jnlp:
+    port: !!str 50000
+    options: {}
+
+jenkins:
+  replicas: 1
+  terminationGracePeriodSeconds: !!str 10
+  serviceAccount: jenkins
+  image:
+    name: myrepo
+    tag: mytag
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 50m
+      memory: 500Mi
+
+pvc:
+  name: jenkins-home
+  size: !!str 4Gi
+  accessModes: ReadWriteOnce
+  storageClassName: jenkins-master
+  zones: myzones
+  iops: !!str 50

@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: certificate-signer
+  namespace: kube-system
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: certificate-signer
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+    spec:
+      serviceAccountName: certificate-signer
+      containers:
+      - name: certificate-signer
+        image: myregistry:mytag
+        resources:
+          requests:
+            cpu: 50m
+            memory: 100Mi
+          limits:
+            cpu: 250m
+            memory: 550Mi
+        env:
+          - name: CLUSTER
+            value: "yes"
+        imagePullPolicy: Always
+      restartPolicy: Always
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
