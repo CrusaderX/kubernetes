@@ -7,11 +7,11 @@ kops edit cluster --name=my_cluster
 ```
 
 ```yaml
- kubeAPIServer:
+  kubeAPIServer:
     authorizationMode: RBAC,Node
     auditLogPath: /var/log/kube-apiserver-audit.log
-    auditLogMaxAge: 30
-    auditLogMaxBackups: 10
+    auditLogMaxAge: 5
+    auditLogMaxBackups: 5
     auditLogMaxSize: 100
     auditPolicyFile: /srv/kubernetes/audit-policy.yaml
     admissionControl:
@@ -40,58 +40,206 @@ kops edit cluster --name=my_cluster
       runtimeCgroups: "/systemd/system.slice"
     featureGates:
       AllAlpha: "true"
+      BlockVolume: "false"
       RotateKubeletClientCertificate: "true"
       RotateKubeletServerCertificate: "true"
       AdvancedAuditing: "true"
       HugePages: "false"
+      ReadOnlyAPIDataVolumes: "false"
   encryptionConfig: true
   fileAssets:
     - content: |
         apiVersion: audit.k8s.io/v1beta1
         kind: Policy
-        omitStages:
-          - "RequestReceived"
         rules:
-          - level: RequestResponse
-            resources:
-            - group: ""
-              resources: ["pods"]
-          - level: Metadata
-            resources:
-            - group: ""
-              resources: ["pods/log", "pods/status"]
           - level: None
             resources:
-            - group: ""
-              resources: ["configmaps"]
-              resourceNames: ["controller-leader"]
+              - group: ""
+                resources:
+                  - endpoints
+                  - services
+                  - services/status
+            users:
+              - 'system:kube-proxy'
+            verbs:
+              - watch
+
           - level: None
-            users: ["system:kube-proxy"]
-            verbs: ["watch"]
             resources:
-            - group: ""
-              resources: ["endpoints", "services"]
+              - group: ""
+                resources:
+                  - nodes
+                  - nodes/status
+            userGroups:
+              - 'system:nodes'
+            verbs:
+              - get
+
           - level: None
-            userGroups: ["system:authenticated"]
+            namespaces:
+              - kube-system
+            resources:
+              - group: ""
+                resources:
+                  - endpoints
+            users:
+              - 'system:kube-controller-manager'
+              - 'system:kube-scheduler'
+              - 'system:serviceaccount:kube-system:endpoint-controller'
+            verbs:
+              - get
+              - update
+
+          - level: None
+            resources:
+              - group: ""
+                resources:
+                  - namespaces
+                  - namespaces/status
+                  - namespaces/finalize
+            users:
+              - 'system:apiserver'
+            verbs:
+              - get
+
+          - level: None
+            resources:
+              - group: metrics.k8s.io
+                resources:
+                  - initializerconfigurations
+                  - services
+                  - endpoints
+            users:
+              - 'system:kube-controller-manager'
+            verbs:
+              - get
+              - list
+
+          - level: None
+            resources:
+              - group: admissionregistration.k8s.io
+              - group: audit.k8s.io/v1beta1
+            users:
+              - 'system:apiserver'
+            verbs:
+              - get
+              - list
+
+          - level: None
             nonResourceURLs:
-            - "/api*"
-            - "/version"
+              - '/healthz*'
+              - /version
+              - '/swagger*'
+
+          - level: None
+            resources:
+              - group: ""
+                resources:
+                  - events
+
+          - level: None
+            omitStages:
+              - RequestReceived
+            resources:
+              - group: ""
+                resources:
+                  - nodes/status
+                  - pods/status
+            users:
+              - kubelet
+              - 'system:node-problem-detector'
+              - 'system:serviceaccount:kube-system:node-problem-detector'
+            verbs:
+              - update
+              - patch
+
           - level: Request
+            omitStages:
+              - RequestReceived
             resources:
-            - group: ""
-              resources: ["configmaps"]
-            namespaces: ["kube-system"]
-          - level: Metadata
+              - group: ""
+                resources:
+                  - nodes/status
+                  - pods/status
+            userGroups:
+              - 'system:nodes'
+            verbs:
+              - update
+              - patch
+
+          - level: None
+            omitStages:
+              - RequestReceived
+            users:
+              - 'system:serviceaccount:kube-system:namespace-controller'
+            verbs:
+              - deletecollection
+
+          - level: RequestResponse
+            omitStages:
+              - RequestReceived
             resources:
-            - group: ""
-              resources: ["secrets", "configmaps"]
-          - level: Request
+              - group: ""
+                resources:
+                  - secrets
+                  - configmaps
+              - group: authentication.k8s.io
+                resources:
+                  - tokenreviews
+
+          - level: None
+            omitStages:
+              - RequestReceived
             resources:
-            - group: ""
-            - group: "extensions"
+              - group: ""
+              - group: admissionregistration.k8s.io
+              - group: apiextensions.k8s.io
+              - group: apiregistration.k8s.io
+              - group: apps
+              - group: authentication.k8s.io
+              - group: authorization.k8s.io
+              - group: autoscaling
+              - group: batch
+              - group: certificates.k8s.io
+              - group: extensions
+              - group: metrics.k8s.io
+              - group: networking.k8s.io
+              - group: policy
+              - group: rbac.authorization.k8s.io
+              - group: scheduling.k8s.io
+              - group: settings.k8s.io
+              - group: storage.k8s.io
+            verbs:
+              - get
+              - list
+              - watch
+
+          - level: None
+            omitStages:
+              - RequestReceived
+            resources:
+              - group: ""
+              - group: admissionregistration.k8s.io
+              - group: apiextensions.k8s.io
+              - group: apiregistration.k8s.io
+              - group: apps
+              - group: authentication.k8s.io
+              - group: authorization.k8s.io
+              - group: autoscaling
+              - group: batch
+              - group: certificates.k8s.io
+              - group: extensions
+              - group: metrics.k8s.io
+              - group: networking.k8s.io
+              - group: policy
+              - group: rbac.authorization.k8s.io
+              - group: scheduling.k8s.io
+              - group: settings.k8s.io
+              - group: storage.k8s.io
+              
           - level: Metadata
             omitStages:
-              - "RequestReceived"
+              - RequestReceived
       name: audit-policy-file
       path: /srv/kubernetes/audit-policy.yaml
       roles:
