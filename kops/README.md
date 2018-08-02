@@ -245,6 +245,10 @@ kops edit cluster --name=my_cluster
       - Master
 
 ```
+
+NOTE:
+> If you don't see the output of `kubectl logs -f` from pod, you should add `APIResponseCompression: "false"` into featureGates section
+
 Insert into etcd section for both main/events sections: 
 ```yaml  
   enableEtcdTLS: true
