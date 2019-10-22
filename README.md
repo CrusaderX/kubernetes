@@ -1,4 +1,4 @@
-# Some Kubernetes tips and everything connected with it
+# Some Kubernetes tips and a little bit more
 
 I will try to examine so many problems and questions as I can cover. Will try to do my best and of course pull requests and comments are welcome.
 
