@@ -1,7 +1,0 @@
-apiVersion: v1
-name: jenkins
-deprecated: false
-description: helm chart for deploy jenkins master
-icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
-version: 1.0.0
-appVersion: v2

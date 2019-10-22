@@ -320,27 +320,3 @@ def change_api_manifest(file):
             item["command"][2] = command
         return results
 ```
-
----
-
-TLS for Tiller & Helm
-
-Add `v3_ca` section configuration for v3_ca certificate generation
-
-```bash
-sudo sh -c 'cat <<EOF >> /etc/ssl/openssl.cnf
-[ v3_ca ]
-basicConstraints = critical,CA:TRUE
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer:always
-EOF'
-```
-
-or use code from `tiller` directory where you should change subj data.
-
-
----
-
-Certificate signer
-
-It's just a small python code for validating certificate pending requests.

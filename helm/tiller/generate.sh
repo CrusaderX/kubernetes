@@ -43,9 +43,9 @@ function input(){
     done
 
     intermediateKeyBit=${intermediateKeyBit:-2048}
-    intermediateKeyPasswd=${intermediateKeyPasswd:-StrongPassword8&&}
+    intermediateKeyPasswd=${intermediateKeyPasswd:-StrongPassword}
     rootKeyBit=${rootKeyBit:-2048}
-    rootKeyPasswd=${rootKeyPasswd:-StrongPassword8&&}
+    rootKeyPasswd=${rootKeyPasswd:-StrongPassword}
 }
 
 function rootCA(){
@@ -87,16 +87,23 @@ function helmCert(){
 
 function helmInit(){
 
-    OK "Apply rbac for tiller" && { kubectl apply -f rbac.yaml ;}
+    kubectl apply -f rbac.yaml
     OK "Checking helm secret plugin" && {
         if helm plugin list | grep -q secrets ; then OK "Already installed" ; else
             OK "Installing helm secret plugin" ; helm plugin install https://github.com/futuresimple/helm-secrets ; fi ;}
-    OK "Init helm" && { helm init --tiller-tls --tiller-tls-cert tiller/tiller.cert --tiller-tls-key tiller/tiller.key \
-        --tiller-tls-verify --tls-ca-cert ca/ca.cert --service-account tiller --override 'spec.template.spec.containers[0].command'='{/tiller,--storage=secret}' ;}
+    OK "Init helm" && {
+      helm init --tiller-tls \
+                --tiller-tls-cert tiller/tiller.cert \
+                --tiller-tls-key tiller/tiller.key \
+                --tiller-tls-verify \
+                --tls-ca-cert ca/ca.cert \
+                --service-account tiller \
+                --override 'spec.template.spec.containers[0].command'='{/tiller,--storage=secret}' ;
+    }
     OK "Copying certs to helm home" && {
-        cp ca/ca.cert ~/.helm/ca.pem ;
-        cp helm/helm.cert ~/.helm/cert.pem ;
-        cp helm/helm.key ~/.helm/key.pem ;}
+        cp ca/ca.cert /app/.helm/ca.pem ;
+        cp helm/helm.cert /app/.helm/cert.pem ;
+        cp helm/helm.key /app/.helm/key.pem ;}
     OK "Initialization complite successfully. Now you can try use 'helm ls --tls'"
 }
 
