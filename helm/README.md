@@ -1,9 +1,11 @@
 ## Helm tips & tricks
 
-1. Imagine that someone have many services with one template and want to pick service options for it. Example:
 
 
-`values.yaml`
+Imagine that someone has many services with one template and want to pick service options for it. Example:
+
+
+values.yaml:
 ```yaml
 services:
     ms01:
@@ -26,7 +28,7 @@ services:
 ```
 
 
-`templates/deployment.yaml`
+templates/deployment.yaml:
 ```yaml
 {{- $vars := pluck .Values.app .Values.services | first }}
 {{- $port := first (values (pick $vars "port")) }}
@@ -35,7 +37,7 @@ services:
 {{- $readiness :=  first (values (pick $vars "readiness")) }}
 ```
 
-So now you can manipulate this variables as you wish. Examples:
+So now he can manipulate this variables as he wish. Example:
 
 ```yaml
 readinessProbe:
@@ -54,16 +56,18 @@ env:
   {{- end }}
 ```
 
+And update it
+
 ```console
 $ helm upgrade ${deployment} ${deploymentPath} --set app=ms01
 ```
 
 
-2. Imagine that someone want to deploy service with `:latest` tag (please, don't do this). Anyway, we can
+Imagine that someone want to deploy service with `:latest` tag (please, don't do this). Anyway, we can
 do some tricks. Add `env` variable that will be changed every deploy and do not forget to set `imagePullPolicy` to `Always`
 
 
-`_helpers.tpl`
+_helpers.tpl:
 ```yaml
 {{- define "app.date" -}}
 {{- printf "%s" now | trunc 19 }}
@@ -71,7 +75,7 @@ do some tricks. Add `env` variable that will be changed every deploy and do not 
 ```
 
 
-`templates/deployment.yaml`
+templates/deployment.yaml:
 ```yaml
 env:
   - name: APP__DEPLOY__TIMESTAMP
