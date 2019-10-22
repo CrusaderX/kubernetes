@@ -1,7 +1,6 @@
 ## Helm tips & tricks
 
 
-
 Imagine that someone has many services with one template and want to pick service options for it. Example:
 
 
@@ -62,7 +61,7 @@ And update it
 $ helm upgrade ${deployment} ${deploymentPath} --set app=ms01
 ```
 
-
+---
 Imagine that someone want to deploy service with `:latest` tag (please, don't do this). Anyway, we can
 do some tricks. Add `env` variable that will be changed every deploy and do not forget to set `imagePullPolicy` to `Always`
 
@@ -81,3 +80,4 @@ env:
   - name: APP__DEPLOY__TIMESTAMP
     value: {{ template "app.date" . }}
 ```
+---
