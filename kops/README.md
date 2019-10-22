@@ -7,6 +7,13 @@ kops edit cluster --name=my_cluster
 ```
 
 ```yaml
+  kubelet:
+    kubeletCgroups: "/systemd/system.slice"
+    runtimeCgroups: "/systemd/system.slice"
+    anonymousAuth: false
+  masterKubelet:
+    kubeletCgroups: "/systemd/system.slice"
+    runtimeCgroups: "/systemd/system.slice"
   kubeAPIServer:
     authorizationMode: RBAC,Node
     auditLogPath: /var/log/kube-apiserver-audit.log
@@ -31,13 +38,6 @@ kops edit cluster --name=my_cluster
       settings.k8s.io/v1alpha1: "true"
       rbac.authorization.k8s.io/v1alpha1: "true"
       batch/v2alpha1: "true"
-    kubelet:
-      kubeletCgroups: "/systemd/system.slice"
-      runtimeCgroups: "/systemd/system.slice"
-      anonymousAuth: false
-    masterKubelet:
-      kubeletCgroups: "/systemd/system.slice"
-      runtimeCgroups: "/systemd/system.slice"
     featureGates:
       AllAlpha: "true"
       BlockVolume: "false"
@@ -118,7 +118,6 @@ kops edit cluster --name=my_cluster
           - level: None
             resources:
               - group: admissionregistration.k8s.io
-              - group: audit.k8s.io/v1beta1
             users:
               - 'system:apiserver'
             verbs:
@@ -246,10 +245,13 @@ kops edit cluster --name=my_cluster
       - Master
 
 ```
-Insert into etcd section: 
+
+NOTE:
+> If you don't see the output of `kubectl logs -f` from pod, you should add `APIResponseCompression: "false"` into featureGates section
+
+Insert into etcd section for both main/events sections: 
 ```yaml  
   enableEtcdTLS: true
-  enableEtcdAuth: true
   version: 3.1.17
 ```
 Enable `encryptionConfig` via `config.yaml`:
