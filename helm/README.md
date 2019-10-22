@@ -59,7 +59,7 @@ $ helm upgrade ${deployment} ${deploymentPath} --set app=ms01
 ```
 
 
-2. Imagine that someone what to deploy service with `:latest` tag (please, don't do this). Anyway, we can
+2. Imagine that someone want to deploy service with `:latest` tag (please, don't do this). Anyway, we can
 do some tricks. Add `env` variable that will be changed every deploy and do not forget to set `imagePullPolicy` to `Always`
 
 
